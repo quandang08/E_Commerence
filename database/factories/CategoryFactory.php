@@ -17,7 +17,9 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->unique()->name(), // Tên danh mục ngẫu nhiên và duy nhất
+            'status' => rand(0,1),
+            'slug' => $this->faker->slug()
         ];
     }
 }
