@@ -12,8 +12,32 @@
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('admin-assets/css/adminlte.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin-assets/css/custom.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin-assets/plugins/dropzone/min/dropzone.min.css') }}">
+    <!-- Include SweetAlert CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.0/dist/sweetalert2.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
+<style>
+    .dropzone {
+        border: 2px dashed #007bff !important;
+        /* Sử dụng !important để ghi đè */
+        border-radius: 5px !important;
+        /* Thêm bo góc nếu cần */
+        background: #f9f9f9 !important;
+        /* Thêm màu nền nếu cần */
+        padding: 20px !important;
+        /* Thêm khoảng cách bên trong */
+    }
+
+    .dropzone .dz-message {
+        font-size: 1.2em !important;
+        /* Thay đổi kích thước chữ */
+        color: #007bff !important;
+        /* Thay đổi màu chữ */
+        text-align: center !important;
+        /* Canh giữa chữ */
+    }
+</style>
 
 <body class="hold-transition sidebar-mini">
     <!-- Site wrapper -->
@@ -84,6 +108,11 @@
     <script src="{{ asset('admin-assets/js/adminlte.min.js') }}"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="{{asset('admin-assets/js/demo.js')}}"></script>
+    <!-- Dropzone  -->
+    <script src="{{ asset('admin-assets/plugins/dropzone/min/dropzone.min.js') }}"></script>
+
+    <!-- Include SweetAlert JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.0/dist/sweetalert2.min.js"></script>
 
     <!-- Chống lại các cuộc tấn công CSRF (Cross-Site Request Forgery)  -->
     <script type="text/javascript">
