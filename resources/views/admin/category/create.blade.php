@@ -33,7 +33,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="slug">Slug</label>
-                                <input type="text" name="slug" id="slug" class="form-control" placeholder="Slug">
+                                <input type="text" readonly name="slug" id="slug" class="form-control" placeholder="Slug">
                                 <p></p>
                             </div>
                         </div>
@@ -128,22 +128,28 @@
             });
         });
     });
-    $("#name").change(function() {
-        element = $(this);
-        $("button[type=submit]").prop('disabled', true);
-        $.ajax({
-            url: '{{ route("getSlug")}}',
-            type: 'post',
-            data: {
-                title: element.val()
-            },
-            dataType: 'json',
-            success: function(response) {
-                $("button[type=submit]").prop('disabled', false);
-                if (response["status"] == true) {
-                    $("#slug").val(response["slug"]);
+
+    $(document).ready(function() {
+        $("#name").on('input', function() { // Use 'input' event for real-time slug generation
+            let element = $(this);
+            $("button[type=submit]").prop('disabled', true);
+
+            $.ajax({
+                url: '{{ route("getSlug") }}',
+                type: 'GET', // Ensure your route allows GET requests
+                data: { title: element.val() },
+                dataType: 'json',
+                success: function(response) {
+                    $("button[type=submit]").prop('disabled', false);
+                    if (response.status == true) {
+                        $("#slug").val(response.slug);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error(error); // Optional: log any error for debugging
+                    $("button[type=submit]").prop('disabled', false); // Re-enable the button even on error
                 }
-            }
+            });
         });
     });
 
