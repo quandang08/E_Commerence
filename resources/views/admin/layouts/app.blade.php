@@ -12,6 +12,8 @@
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('admin-assets/css/adminlte.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin-assets/css/custom.css') }}">
+    <link rel="stylesheet" href="{{asset('admin-assets/plugins/dropzone/dropzone.css')}}">
+    <link rel="stylesheet" href="{{asset('admin-assets/plugins/summernote/summernote-bs4.min.css')}}">
     <link rel="stylesheet" href="{{ asset('admin-assets/plugins/dropzone/min/dropzone.min.css') }}">
     <!-- Include SweetAlert CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.0/dist/sweetalert2.min.css">
@@ -110,6 +112,9 @@
     <script src="{{asset('admin-assets/js/demo.js')}}"></script>
     <!-- Dropzone  -->
     <script src="{{ asset('admin-assets/plugins/dropzone/min/dropzone.min.js') }}"></script>
+
+    <script src="{{asset('admin-assets/plugins/summernote/summernote-bs4.min.js')}}"></script>
+    <script src="{{asset('admin-assets/plugins/dropzone/dropzone.js')}}"></script>
 
     <!-- Include SweetAlert JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.0/dist/sweetalert2.min.js"></script>
