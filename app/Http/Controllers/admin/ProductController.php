@@ -6,24 +6,41 @@ use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Auth\Events\Validated;
+use App\Models\ProductImage;
+use App\Models\TempImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Intervention\Image\Facades\Image;
+
 
 class ProductController extends Controller
 {
-    public function create(){
-        $data =[];
-        $categories = Category::orderBy('name','ASC')->get();
-        $brands = Brand::orderBy('name','ASC')->get();
+    public function index(Request $request)
+    {
+        $products = Product::latest('id')->with('product_images');
+
+        if ($request->get('keyword') != "") {
+            $products = $products->where('title', 'like', '%' . $request->keyword . '%');
+        }
+        $products = $products->paginate();
+        $data['products'] = $products;
+        return view('admin.product.list', $data);
+    }
+
+    public function create()
+    {
+        $data = [];
+        $categories = Category::orderBy('name', 'ASC')->get();
+        $brands = Brand::orderBy('name', 'ASC')->get();
         $data['categories'] = $categories;
         $data['brands'] = $brands;
 
         return view('admin.product.create', $data);
     }
 
-    public function store(Request $request){
-        $rules =[
+    public function store(Request $request)
+    {
+        $rules = [
             'title' => 'required',
             'slug'  => 'required|unique:products',
             'price' => 'required|numeric',
@@ -33,17 +50,17 @@ class ProductController extends Controller
             'is_featured' => 'required|in:Yes,No',
         ];
 
-        if(!empty($request->track_qty) && $request->track_qty == 'Yes'){
+        if (!empty($request->track_qty) && $request->track_qty == 'Yes') {
             $rules['qty'] = 'required|numeric';
         }
 
-        $validator = Validator::make($request->all(),$rules);
+        $validator = Validator::make($request->all(), $rules);
 
-        if($validator->passes()){
+        if ($validator->passes()) {
             $product = new Product;
             $product->title = $request->title;
-            $product->slug = $request->slug; // Assuming slug should be taken from request
-            $product->description = $request->description; // Assuming slug should be taken from request
+            $product->slug = $request->slug;
+            $product->description = $request->description;
             $product->price = $request->price;
             $product->compare_price = $request->compare_price;
             $product->sku = $request->sku;
@@ -56,14 +73,42 @@ class ProductController extends Controller
             $product->brand_id = $request->brand;
             $product->is_featured = $request->is_featured;
 
-            // Save the product to the database
             $product->save();
 
-            session()->flash('success','Product created successfully!');
-            // Return a success response
+            if (!empty($request->image_array)) {
+                foreach ($request->image_array as $temp_image_id) {
+                    $tempImageInfo = TempImage::find($temp_image_id);
+                    $extArray = explode('.', $tempImageInfo->name);
+                    $ext = last($extArray);
+
+                    $productImage = new ProductImage();
+                    $productImage->product_id = $product->id;
+                    $productImage->image = 'NULL';
+                    $productImage->save();
+
+                    $imageName = $product->id . '-' . $productImage->id . '-' . time() . '.' . $ext;
+                    $productImage->image = $imageName;
+                    $productImage->save();
+
+                    $sourcePath = public_path() . '/temp/' . $tempImageInfo->name;
+                    $largeDestPath = public_path() . '/uploads/product/large/' . $imageName;
+                    $smallDestPath = public_path() . '/uploads/product/small/' . $imageName;
+
+                    $image = Image::make($sourcePath);
+
+                    $image->resize(1400, null, function ($constraint) {
+                        $constraint->aspectRatio();
+                    })->save($largeDestPath);
+
+                    $image->fit(300, 300)->save($smallDestPath);
+                }
+            }
+
+            session()->flash('success', 'Product created successfully!');
             return response()->json([
-                'message' => 'Product created successfully!'], 200);
-        }else{
+                'message' => 'Product created successfully!'
+            ], 200);
+        } else {
             return response()->json([
                 'status' => false,
                 'errors' => $validator->errors()

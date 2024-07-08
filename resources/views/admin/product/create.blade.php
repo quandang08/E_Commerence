@@ -9,7 +9,7 @@
                 <h1>Create Product</h1>
             </div>
             <div class="col-sm-6 text-right">
-                <a href="products.html" class="btn btn-primary">Back</a>
+                <a href="{{route('products.index')}}" class="btn btn-primary">Back</a>
             </div>
         </div>
     </div>
@@ -58,6 +58,9 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div class="row" id="product-gallery">
+
                     </div>
                     <div class="card mb-3">
                         <div class="card-body">
@@ -243,7 +246,8 @@
 
     $("#productForm").submit(function(event) {
         event.preventDefault();
-        formArray = $(this).serializeArray();
+        var formArray = $(this).serializeArray();
+
         $("button[type='submit']").prop('disabled', true);
 
         $.ajax({
@@ -252,35 +256,26 @@
             data: formArray,
             dataType: 'json',
             success: function(response) {
-                if (response['status'] == false) {
-
+                if (response['message']) {
+                    window.location.href = "{{route('products.index')}}";
                 } else {
                     var errors = response['errors'];
-                    // if (errors['title']) {
-                    //     $("#title").addClass('is-invalid')
-                    //         .siblings('p')
-                    //         .addClass('invalid-feedback')
-                    //         .html(errors['title']);
-                    // } else {
-                    //     $("#title").addClass('is-invalid')
-                    //         .siblings('p')
-                    //         .removeClass('invalid-feedback')
-                    //         .html("");
-                    // }
-
                     $(".errors").removeClass('invalid-feedback').html('');
                     $("input[type='text'], select, input[type='number']").removeClass('is-invalid');
 
-                    $.each(errors, function(key,value){
+                    $.each(errors, function(key, value) {
                         $(`#${key}`).addClass('is-invalid')
-                        .siblings('p')
-                        .addClass('invalid-feedback')
-                        .html(value)
+                            .siblings('p')
+                            .addClass('invalid-feedback')
+                            .html(value);
                     });
                 }
             },
             error: function() {
                 console.log("Something went wrong!");
+            },
+            complete: function() {
+                $("button[type='submit']").prop('disabled', false);
             }
         });
     });
@@ -305,5 +300,35 @@
             }
         });
     });
+
+    Dropzone.autoDiscover = false;
+    const dropzone = $("#image").dropzone({
+        url: "{{ route('temp-images.create') }}",
+        maxFiles: 10,
+        paramName: 'image',
+        addRemoveLinks: true,
+        acceptedFiles: "image/jpeg,image/png,image/gif",
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(file, response) {
+            var html = `<div class="col mb-3" id="image-row-${response.image_id}"><div class="card">
+        <input type="hidden" name="image_array[]" value="${response.image_id}">
+            <img src = "${response.ImagePath}"class = "card-img-top"alt = "" >
+            <div class = "card-body" >
+                <a href="javascript:void(0)" onclick="deleteImage(${response.image_id})" class="btn btn-danger">Delete</a>
+            </div>
+        </div></div>`;
+
+            $("#product-gallery").append(html);
+        },
+        complete: function(file) {
+            this.removeFile(file);
+        }
+    });
+
+    function deleteImage(id) {
+        $("#image-row-" + id).remove();
+    }
 </script>
 @endsection
