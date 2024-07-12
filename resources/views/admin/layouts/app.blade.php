@@ -112,12 +112,11 @@
     <script src="{{asset('admin-assets/js/demo.js')}}"></script>
     <!-- Dropzone  -->
     <script src="{{ asset('admin-assets/plugins/dropzone/min/dropzone.min.js') }}"></script>
+    <!-- Include SweetAlert JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.0/dist/sweetalert2.min.js"></script>
 
     <script src="{{asset('admin-assets/plugins/summernote/summernote-bs4.min.js')}}"></script>
     <script src="{{asset('admin-assets/plugins/dropzone/dropzone.js')}}"></script>
-
-    <!-- Include SweetAlert JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.0/dist/sweetalert2.min.js"></script>
 
     <!-- Chống lại các cuộc tấn công CSRF (Cross-Site Request Forgery)  -->
     <script type="text/javascript">

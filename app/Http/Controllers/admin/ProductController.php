@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers\admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\Brand;
-use App\Models\Category;
 use App\Models\Product;
-use App\Models\ProductImage;
+use App\Models\Category;
 use App\Models\TempImage;
+use App\Models\SubCategory;
+use App\Models\ProductImage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\File;
 use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Validator;
+
 
 
 class ProductController extends Controller
@@ -114,5 +117,115 @@ class ProductController extends Controller
                 'errors' => $validator->errors()
             ]);
         }
+    }
+
+    public function edit($id, Request $request)
+    {
+        $product = Product::find($id);
+        if (empty($product)) {
+            return redirect()->route('products.index')->with('error', 'Product not found!');
+        }
+
+        // Fetch product image
+        $productImages = ProductImage::where('product_id', $id)->get();
+
+        // Fetch subcategories based on product's category_id
+        $subCategories = SubCategory::where('category_id', $product->category_id)->get();
+
+        // Fetch all categories and brands
+        $categories = Category::orderBy('name', 'ASC')->get();
+        $brands = Brand::orderBy('name', 'ASC')->get();
+
+        // Prepare data to pass to view
+        $data = [
+            'product' => $product,
+            'productImages' => $productImages,
+            'subCategories' => $subCategories,
+            'categories' => $categories,
+            'brands' => $brands,
+        ];
+
+        return view('admin.product.edit', $data);
+    }
+
+
+    public function update($id, Request $request)
+    {
+        $product = Product::find($id);
+
+        $rules = [
+            'title' => 'required',
+            'slug' => 'required|unique:products,slug,' . $product->id,
+            'price' => 'required|numeric',
+            'sku' => 'required|unique:products,sku,' . $product->id,
+            'track_qty' => 'required|in:Yes,No',
+            'category' => 'required|numeric',
+            'is_featured' => 'required|in:Yes,No',
+        ];
+
+        if (!empty($request->track_qty) && $request->track_qty == 'Yes') {
+            $rules['qty'] = 'required|numeric';
+        }
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->passes()) {
+            $product->title = $request->title;
+            $product->slug = $request->slug;
+            $product->description = $request->description;
+            $product->price = $request->price;
+            $product->compare_price = $request->compare_price;
+            $product->sku = $request->sku;
+            $product->barcode = $request->barcode;
+            $product->track_qty = $request->track_qty;
+            $product->qty = $request->qty;
+            $product->status = $request->status;
+            $product->category_id = $request->category;
+            $product->sub_category_id = $request->sub_category;
+            $product->brand_id = $request->brand;
+            $product->is_featured = $request->is_featured;
+
+            $product->save();
+
+            //Save Gallery Pics
+
+            session()->flash('success', 'Product updated successfully!');
+            return response()->json([
+                'message' => 'Product updated successfully!'
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()
+            ]);
+        }
+    }
+
+    public function destroy($id, Request $request){
+        $product = Product::find($id);
+
+        if(empty($product)){
+            session()->flash('error','Product not Found!');
+            return response()->json([
+                'status' => false,
+                'notFound' => 'true'
+            ]);
+        }
+        $productImages =ProductImage::where('product_id',$id)->get();
+
+        if(!empty($productImages)) {
+            foreach($productImages as $productImage){
+                        File::delete(public_path('uploads/products/large/'.$productImage->image));
+                        File::delete(public_path('uploads/products/small/'.$productImage->image));
+            }
+            ProductImage::where('product_id',$id)->delete();
+        }
+        $product->delete();
+        session()->flash('success','Product deleted successfully!');
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Product deleted successfully!'
+        ]);
     }
 }

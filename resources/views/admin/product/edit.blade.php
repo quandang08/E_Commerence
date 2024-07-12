@@ -6,7 +6,7 @@
     <div class="container-fluid my-2">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1>Create Product</h1>
+                <h1>Edit Product</h1>
             </div>
             <div class="col-sm-6 text-right">
                 <a href="{{route('products.index')}}" class="btn btn-primary">Back</a>
@@ -19,7 +19,7 @@
 <section class="content">
     <!-- Default box -->
     <div class="container-fluid">
-        <form action="" id="productForm" name="productForm">
+        <form action="#" id="productForm" name="productForm">
             @csrf
             <div class="row">
                 <div class="col-md-8">
@@ -29,21 +29,23 @@
                                 <div class="col-md-12">
                                     <div class="mb-3">
                                         <label for="title">Title</label>
-                                        <input type="text" name="title" id="title" class="form-control" placeholder="Title">
+                                        <input type="text" name="title" id="title" class="form-control" placeholder="Title" value="{{$product->title}}">
                                         <p class="error"></p>
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="mb-3">
                                         <label for="slug">Slug</label>
-                                        <input type="text" readonly name="slug" id="slug" class="form-control" placeholder="Slug">
+                                        <input type="text" readonly name="slug" id="slug" class="form-control" placeholder="Slug" value="{{$product->slug}}">
                                         <p class="error"></p>
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="mb-3">
                                         <label for="description">Description</label>
-                                        <textarea name="description" id="description" cols="30" rows="10" class="summernote" placeholder="Description"></textarea>
+                                        <textarea name="description" id="description" cols="30" rows="10" class="summernote" placeholder="Description">
+                                        {{$product->description}}
+                                        </textarea>
                                     </div>
                                 </div>
                             </div>
@@ -60,8 +62,21 @@
                         </div>
                     </div>
                     <div class="row" id="product-gallery">
-
+                        @if ($productImages->isNotEmpty())
+                        @foreach ($productImages as $image)
+                        <div class="col mb-3" id="image-row-{{ $image->id }}">
+                            <div class="card">
+                                <input type="hidden" name="image_array[]" value="{{ $image->id }}">
+                                <img src="{{ asset('uploads/product/small/' . $image->image) }}" class="card-img-top" alt="">
+                                <div class="card-body">
+                                    <a href="javascript:void(0)" onclick="deleteImage({{ $image->id }})" class="btn btn-danger">Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                        @endif
                     </div>
+
                     <div class="card mb-3">
                         <div class="card-body">
                             <h2 class="h4 mb-3">Pricing</h2>
@@ -69,14 +84,14 @@
                                 <div class="col-md-12">
                                     <div class="mb-3">
                                         <label for="price">Price</label>
-                                        <input type="text" name="price" id="price" class="form-control" placeholder="Price">
+                                        <input type="text" name="price" id="price" class="form-control" placeholder="Price" value="{{$product->price}}">
                                         <p class="error"></p>
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="mb-3">
                                         <label for="compare_price">Compare at Price</label>
-                                        <input type="text" name="compare_price" id="compare_price" class="form-control" placeholder="Compare Price">
+                                        <input type="text" name="compare_price" id="compare_price" class="form-control" placeholder="Compare Price" value="{{$product->compare_price}}">
                                         <p class="text-muted mt-3">
                                             To show a reduced price, move the product’s original price into Compare at price. Enter a lower value into Price.
                                         </p>
@@ -92,27 +107,27 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="sku">SKU (Stock Keeping Unit)</label>
-                                        <input type="text" name="sku" id="sku" class="form-control" placeholder="sku">
+                                        <input type="text" name="sku" id="sku" class="form-control" placeholder="sku" value="{{$product->sku}}">
                                         <p class="error"></p>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="barcode">Barcode</label>
-                                        <input type="text" name="barcode" id="barcode" class="form-control" placeholder="Barcode">
+                                        <input type="text" name="barcode" id="barcode" class="form-control" placeholder="Barcode" value="{{$product->barcode}}">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="mb-3">
                                         <div class="custom-control custom-checkbox">
                                             <input type="hidden" name="track_qty" value="No">
-                                            <input class="custom-control-input" type="checkbox" id="track_qty" name="track_qty" value="Yes" checked>
+                                            <input class="custom-control-input" type="checkbox" id="track_qty" name="track_qty" value="Yes" checked {{$product->track_qty == 'Yes' ? 'checked' : ''}}>
                                             <label for="track_qty" class="custom-control-label">Track Quantity</label>
                                             <p class="error"></p>
                                         </div>
                                     </div>
                                     <div class="mb-3">
-                                        <input type="number" min="0" name="qty" id="qty" class="form-control" placeholder="Qty">
+                                        <input type="number" min="0" name="qty" id="qty" class="form-control" placeholder="Qty" value="{{$product->qty}}">
                                         <p class="error"></p>
                                     </div>
                                 </div>
@@ -126,8 +141,8 @@
                             <h2 class="h4 mb-3">Product status</h2>
                             <div class="mb-3">
                                 <select name="status" id="status" class="form-control">
-                                    <option value="1">Active</option>
-                                    <option value="0">Block</option>
+                                    <option {{ ($product->status == 1 ? 'selected' : '')}} value="1">Active</option>
+                                    <option {{ ($product->status == 0 ? 'selected' : '')}} value="0">Inactive</option>
                                 </select>
                             </div>
                         </div>
@@ -141,17 +156,22 @@
                                     <option value="">Select a category</option>
                                     @if ($categories->isNotEmpty())
                                     @foreach ($categories as $category)
-                                    <option value="{{$category->id}}">{{$category->name}}</option>
+                                    <option {{($product->category_id == $category->id) ? 'selected' : '' }} value="{{$category->id}}">{{$category->name}}</option>
                                     @endforeach
                                     @endif
                                 </select>
                                 <p class="error"></p>
                             </div>
+
                             <div class="mb-3">
                                 <label for="category">Sub category</label>
                                 <select name="sub_category" id="sub_category" class="form-control">
                                     <option value="">Select a Sub Category</option>
-
+                                    @if ($subCategories->isNotEmpty())
+                                    @foreach ($subCategories as $subCategory)
+                                    <option {{($subCategory->sub_category_id == $subCategory->id) ? 'selected' : '' }} value="{{$subCategory->id}}">{{$subCategory->name}}</option>
+                                    @endforeach
+                                    @endif
                                 </select>
                             </div>
                         </div>
@@ -164,7 +184,7 @@
                                     <option value="">Select a brand</option>
                                     @if ($brands->isNotEmpty())
                                     @foreach ($brands as $brand)
-                                    <option value="{{$brand->id}}">{{$brand->name}}</option>
+                                    <option {{($product->brand_id == $brand->id) ? 'selected' : '' }} value="{{$brand->id}}">{{$brand->name}}</option>
                                     @endforeach
                                     @endif
                                 </select>
@@ -176,8 +196,8 @@
                             <h2 class="h4 mb-3">Featured product</h2>
                             <div class="mb-3">
                                 <select name="is_featured" id="is_featured" class="form-control">
-                                    <option value="No">No</option>
-                                    <option value="Yes">Yes</option>
+                                    <option {{($product->is_featured == 'No') ? 'selected' : '' }} value="No">No</option>
+                                    <option {{($product->is_featured == 'Yes') ? 'selected' : '' }} value="Yes">Yes</option>
                                 </select>
                                 <p class="error"></p>
                             </div>
@@ -187,7 +207,7 @@
             </div>
 
             <div class="pb-5 pt-3">
-                <button type="submit" class="btn btn-primary">Create</button>
+                <button type="submit" class="btn btn-primary">Update</button>
                 <a href="products.html" class="btn btn-outline-dark ml-3">Cancel</a>
             </div>
         </form>
@@ -200,26 +220,68 @@
 @section('customJs')
 <script>
     Dropzone.autoDiscover = false;
-    $(function() {
-        // Summernote
+
+        // Initialize Summernote
         $('.summernote').summernote({
             height: '300px'
         });
 
-        const dropzone = $("#image").dropzone({
-            url: "create-product.html",
-            maxFiles: 5,
+        // Initialize Dropzone for image upload
+        const dropzoneOptions = {
+            url: "{{ route('product-images.update') }}", // Ensure this URL is correct
+            maxFiles: 10,
+            paramName: 'image',
+            params: {
+                'product_id': '{{$product->id}}'
+            },
             addRemoveLinks: true,
             acceptedFiles: "image/jpeg,image/png,image/gif",
             headers: {
-                'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // Include CSRF token in the headers
             },
             success: function(file, response) {
-                $("#image_id").val(response.id);
+                var html = `<div class="col mb-3" id="image-row-${response.image_id}">
+                    <div class="card">
+                        <input type="hidden" name="image_array[]" value="${response.image_id}">
+                        <img src="${response.ImagePath}" class="card-img-top" alt="">
+                        <div class="card-body">
+                            <a href="javascript:void(0)" onclick="deleteImage(${response.image_id})" class="btn btn-danger">Delete</a>
+                        </div>
+                    </div>
+                </div>`;
+                $("#product-gallery").append(html); // Append the new image to the gallery
+            },
+            complete: function(file) {
+                this.removeFile(file); // Remove the file from Dropzone after it is uploaded
             }
-        });
-    });
+        };
 
+        $("#image").dropzone(dropzoneOptions);
+
+    function deleteImage(id) {
+        if (confirm("Are you sure you want to delete image?")) {
+            $.ajax({
+                url: '{{ route("product-images.destroy") }}',
+                type: 'delete',
+                data: {
+                    id: id
+                },
+                success: function(response) {
+                    if (response.status) {
+                        $("#image-row-" + id).remove();
+                        alert(response.message);
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert("Something went wrong!");
+                }
+            });
+        }
+    }
+
+    // Slug generation
     $("#title").on('input', function() {
         let element = $(this);
         $("button[type=submit]").prop('disabled', true);
@@ -233,7 +295,7 @@
             dataType: 'json',
             success: function(response) {
                 $("button[type=submit]").prop('disabled', false);
-                if (response.status === true) {
+                if (response.status) {
                     $("#slug").val(response.slug);
                 }
             },
@@ -244,56 +306,46 @@
         });
     });
 
+    // Form submission
     $("#productForm").submit(function(event) {
         event.preventDefault();
         var formArray = $(this).serializeArray();
 
-        $("button[type='submit']").prop('disabled', true); // Disable the submit button to prevent multiple submissions
+        $("button[type='submit']").prop('disabled', true);
 
         $.ajax({
-            url: '{{route("products.store")}}',
-            type: 'post',
+            url: '{{ route("products.update", $product->id) }}',
+            type: 'PUT',
             data: formArray,
             dataType: 'json',
             success: function(response) {
-                if (response['message']) { // Check if the message exists in the response
-                    window.location.href = "{{route('products.index')}}"; // Redirect to the product list page
+                if (response.message) {
+                    window.location.href = "{{ route('products.index') }}";
                 } else {
-                    var errors = response['errors'];
-                    $(".errors").removeClass('invalid-feedback').html('');
-                    $("input[type='text'], select, input[type='number']").removeClass('is-invalid');
-
-                    $.each(errors, function(key, value) {
-                        $(`#${key}`).addClass('is-invalid')
-                            .siblings('p')
-                            .addClass('invalid-feedback')
-                            .html(value);
-                    });
+                    handleFormErrors(response.errors);
                 }
             },
             error: function() {
                 console.log("Something went wrong!");
             },
             complete: function() {
-                $("button[type='submit']").prop('disabled', false); // Re-enable the submit button after the request is complete
+                $("button[type='submit']").prop('disabled', false);
             }
         });
     });
 
+    // Category change
     $("#category").change(function() {
         var category_id = $(this).val();
         $.ajax({
-            url: '{{route("product-subcategories.index")}}',
-            type: 'get',
+            url: '{{ route("product-subcategories.index") }}',
+            type: 'GET',
             data: {
                 category_id: category_id
             },
             dataType: 'json',
             success: function(response) {
-                $("#sub_category").find("option").not(":first").remove(); // Remove all options except the first
-                $.each(response["subcategories"], function(key, item) { // Iterate through subcategories
-                    $("#sub_category").append("<option value='" + item.id + "'>" + item.name + "</option>");
-                });
+                updateSubcategories(response.subcategories);
             },
             error: function() {
                 console.log("Something went wrong!");
@@ -301,34 +353,47 @@
         });
     });
 
-    Dropzone.autoDiscover = false;
-    const dropzone = $("#image").dropzone({
-        url: "{{ route('temp-images.create') }}",
-        maxFiles: 10,
-        paramName: 'image',
-        addRemoveLinks: true,
-        acceptedFiles: "image/jpeg,image/png,image/gif",
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // Include CSRF token in the headers
-        },
-        success: function(file, response) {
-            var html = `<div class="col mb-3" id="image-row-${response.image_id}"><div class="card">
-        <input type="hidden" name="image_array[]" value="${response.image_id}">
-            <img src = "${response.ImagePath}"class = "card-img-top"alt = "" >
-            <div class = "card-body" >
-                <a href="javascript:void(0)" onclick="deleteImage(${response.image_id})" class="btn btn-danger">Delete</a>
-            </div>
-        </div></div>`;
+    function handleFormErrors(errors) {
+        $(".errors").removeClass('invalid-feedback').html('');
+        $("input[type='text'], select, input[type='number']").removeClass('is-invalid');
 
-            $("#product-gallery").append(html); // Append the new image to the gallery
-        },
-        complete: function(file) {
-            this.removeFile(file); // Remove the file from Dropzone after it is uploaded
-        }
-    });
+        $.each(errors, function(key, value) {
+            $(`#${key}`).addClass('is-invalid')
+                .siblings('p')
+                .addClass('invalid-feedback')
+                .html(value);
+        });
+    }
+
+    function updateSubcategories(subcategories) {
+        $("#sub_category").find("option").not(":first").remove();
+        $.each(subcategories, function(key, item) {
+            $("#sub_category").append(`<option value="${item.id}">${item.name}</option>`);
+        });
+    }
 
     function deleteImage(id) {
-        $("#image-row-" + id).remove();  // Remove the image row from the gallery
+        if (confirm("Are you sure you want to delete this image?")) {
+            $.ajax({
+                url: '{{ route("product-images.destroy") }}',
+                type: 'DELETE',
+                data: {
+                    id: id
+                },
+                success: function(response) {
+                    if (response.status) {
+                        $(`#image-row-${id}`).remove();
+                        alert(response.message);
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert("Something went wrong!");
+                }
+            });
+        }
     }
 </script>
+
 @endsection
