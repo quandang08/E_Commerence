@@ -12,7 +12,7 @@ use App\Http\Controllers\admin\ProductImageController;
 use App\Http\Controllers\admin\ProductSubCategoryController;
 use App\Http\Controllers\admin\SubCategoryController;
 use App\Http\Controllers\admin\TempImagesController;
-
+use App\Http\Controllers\FrontController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,9 +25,11 @@ use App\Http\Controllers\admin\TempImagesController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+
+Route::get('/', [FrontController::class, 'index'])->name('front.home');
 
 Route::group(['prefix' => 'admin'], function(){
     Route::group(['middleware' => 'admin.guest'], function(){
