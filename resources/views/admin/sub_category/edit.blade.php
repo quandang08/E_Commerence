@@ -31,11 +31,11 @@
                                 <select name="category" id="category" class="form-control">
                                     <option value="">Select a category</option>
                                     @if ($categories->isNotEmpty())
-                                        @foreach ($categories as $category)
-                                            <option {{ $subCategory->category_id == $category->id ? 'selected' : '' }} value="{{ $category->id }}">
-                                                {{ $category->name }}
-                                            </option>
-                                        @endforeach
+                                    @foreach ($categories as $category)
+                                    <option {{ $subCategory->category_id == $category->id ? 'selected' : '' }} value="{{ $category->id }}">
+                                        {{ $category->name }}
+                                    </option>
+                                    @endforeach
                                     @endif
                                 </select>
                                 <p></p>
@@ -61,6 +61,16 @@
                                 <select name="status" id="status" class="form-control">
                                     <option value="1" {{ isset($subCategory) && $subCategory->status == 1 ? 'selected' : '' }}>Active</option>
                                     <option value="0" {{ isset($subCategory) && $subCategory->status == 0 ? 'selected' : '' }}>Inactive</option>
+                                </select>
+                                <p></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3 ">
+                                <label for="status">Show on Home</label>
+                                <select name="showHome" id="showHome" class="form-control">
+                                    <option value="Yes" {{ isset($subCategory) && $subCategory->status == 'Yes' ? 'selected' : '' }}>Yes</option>
+                                    <option value="No" {{ isset($subCategory) && $subCategory->status == 'No' ? 'selected' : '' }}>No</option>
                                 </select>
                                 <p></p>
                             </div>
@@ -118,7 +128,9 @@
             $.ajax({
                 url: '{{ route("getSlug") }}',
                 type: 'GET',
-                data: { title: element.val() },
+                data: {
+                    title: element.val()
+                },
                 dataType: 'json',
                 success: function(response) {
                     $("button[type=submit]").prop('disabled', false);
@@ -157,4 +169,3 @@
     });
 </script>
 @endsection
-
