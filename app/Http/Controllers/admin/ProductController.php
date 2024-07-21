@@ -10,6 +10,7 @@ use App\Models\SubCategory;
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Faker\Provider\Lorem;
 use Illuminate\Support\Facades\File;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Validator;
@@ -75,9 +76,11 @@ class ProductController extends Controller
             $product->sub_category_id = $request->sub_category;
             $product->brand_id = $request->brand;
             $product->is_featured = $request->is_featured;
-
+            $product->shipping_returns = $request->shipping_returns;
+            $product->short_description = $request->short_description;
             $product->save();
 
+            //Save Gallery Pics
             if (!empty($request->image_array)) {
                 foreach ($request->image_array as $temp_image_id) {
                     $tempImageInfo = TempImage::find($temp_image_id);
@@ -184,6 +187,8 @@ class ProductController extends Controller
             $product->sub_category_id = $request->sub_category;
             $product->brand_id = $request->brand;
             $product->is_featured = $request->is_featured;
+            $product->shipping_returns = $request->shipping_returns;
+            $product->short_description = $request->short_description;
 
             $product->save();
 
